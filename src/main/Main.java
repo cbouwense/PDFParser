@@ -1,6 +1,6 @@
 package main;
 
-import org.apache.pdfbox.pdmodel;
+import org.apache.pdfbox.pdmodel.PDDocument;
 
 public class Main {
 
