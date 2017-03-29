@@ -3,6 +3,9 @@ repositories {
 }
 
 apply plugin: "java"
+apply plugin: "application"
+
+mainClassName = "main.Main"
 
 dependencies {
 	compile "org.apache.pdfbox:pdfbox:2.0.5"
@@ -11,8 +14,4 @@ dependencies {
 sourceSets {
 	main.java.srcDir "src/main"
 	test.java.srcDir "src/test"
-}
-
-jar {
-	manifest.attributes "Main-Class": "main.Main"
 }
