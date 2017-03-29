@@ -4,6 +4,7 @@ repositories {
 
 apply plugin: "java"
 apply plugin: "application"
+apply plugin: "eclipse"
 
 mainClassName = "main.Main"
 
@@ -12,6 +13,6 @@ dependencies {
 }
 
 sourceSets {
-	main.java.srcDir "src/main"
-	test.java.srcDir "src/test"
+	main.java.srcDir "src"
+	test.java.srcDir "src"
 }

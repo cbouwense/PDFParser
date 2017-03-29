@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src">
+		<attributes>
+			<attribute name="FROM_GRADLE_MODEL" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
+	<classpathentry kind="lib" path="C:/Users/Christian/.gradle/caches/modules-2/files-2.1/org.apache.pdfbox/fontbox/2.0.5/ca00287e3f18d5a52e5fddc9b6afc43ebd5e53e6/fontbox-2.0.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Christian/.gradle/caches/modules-2/files-2.1/org.apache.pdfbox/pdfbox/2.0.5/bf3a2bda6d416360e81bef356db326eb55b7b7ee/pdfbox-2.0.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
