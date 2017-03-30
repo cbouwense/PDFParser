@@ -88,3 +88,6 @@ local.properties
 .scala_dependencies
 .worksheet
 
+csvtest.csv
+foo.pdf
+

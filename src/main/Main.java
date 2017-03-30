@@ -2,6 +2,8 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 
@@ -9,11 +11,12 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 		
+		PrintWriter out = new PrintWriter("values.csv");
+		
 		try {
 			
 		    String text = getText(new File("C:\\Users\\Christian\\Google Drive\\Jobs\\Arnold\\sheriff_foreclosuresales_list.pdf"));
-		    //System.out.println("Text in PDF: " + text.substring(0, 5000));
-		    formatText(text);
+		    out.println(formatText(text));
 		    
 		} catch (IOException e) {
 			
@@ -46,53 +49,56 @@ public class Main {
 		// Replace all of the commas in the pdf with spaces
 		s = s.replace(',', ' ');
 		
-		String f = "";
-		String afterAttorney = "";
+		String f = "File Number,Court Case No.,Plaintiff,Defendant,Attorney,Location,Original Sale Date\n";
+		
+		// Temporary string to hold first wave of formatting. The data will be put into commas
+		// and then will be stripped of newlines. Then a newline will be added to the end of 
+		// the date so the excel file looks nice.
+		String t = "";
 		int i = 0;
 		
 		while(s.length() > 71) {
-			// Append "File Number" onto our fresh string.
-			f += ",File Number,";
 			// Concatenate the value for File Number.
-			f = f.concat(s.substring(s.indexOf("File Number:  ")+14, s.indexOf("File Number:  ")+22));
+			t = t.concat(s.substring(s.indexOf("File Number:  ")+14, s.indexOf("File Number:  ")+22) + ",");
 			
-			f += ",Court Case No.,";
-			f = f.concat(s.substring(s.indexOf("Court Case No.:  ")+17, s.indexOf("Court Case No.:  ")+28));
+			// Court Case No.
+			t = t.concat(s.substring(s.indexOf("Court Case No.:  ")+17, s.indexOf("Court Case No.:  ")+28) + ",");
 					
+			// 
 			// Find the end of Location
 			i = s.indexOf("Plaintiff");
 			while (i != s.indexOf("Defendant")) {
 				i++;
 			}
-			f += ",Plaintiff,";
-			f = f.concat(s.substring(s.indexOf("Plaintiff ")+10, i));
+			// Plaintiff
+			t = t.concat(s.substring(s.indexOf("Plaintiff ")+10, i) + ",");
 			
-			f += ",Defendant,";
-			f = f.concat(s.substring(s.indexOf("Defendant ")+10, s.indexOf("Attorney")-2));
+			// Defendant
+			t = t.concat(s.substring(s.indexOf("Defendant ")+10, s.indexOf("Attorney")-2) + ",");
 			
+			// Attorney
 			i = s.indexOf("Attorney");
 			while (!s.substring(i, i+2).equals("Sc") && !s.substring(i, i+2).equals("SO") && !s.substring(i, i+2).equals("MI")) {
 				i++;
 			}
-			f += ",Attorney,";
-			f = f.concat(s.substring(s.indexOf("Attorney ")+9, i));
+			t = t.concat(s.substring(s.indexOf("Attorney ")+9, i) + ",");
 			
+			// Sale Date
 			i = s.indexOf("Location");
 			while (s.charAt(i) != '\n') {
 				i++;
 			}
-			f += ",Location,";
-			f = f.concat(s.substring(s.indexOf("Location: ")+10, i-1));
+			t = t.concat(s.substring(s.indexOf("Location: ")+10, i-1) + ",");
 	     
-			f += ",Original Sale Date,";
-			f = f.concat(s.substring(s.indexOf("Sale Date: ")+11, s.indexOf("File Number: ")-1));
+			t = t.concat(s.substring(s.indexOf("Sale Date: ")+11, s.indexOf("File Number: ")-1));
 			
+			/*
 			i = s.indexOf("Plaintiff");
 			while (!s.substring(i, i+2).equals("  ")) {
 				i++;
 			}
-			//f += ",Sold Price,";
-			//f = f.concat(s.substring(i+2, s.indexOf("Defendant")-1));
+			f = f.concat(s.substring(i+2, s.indexOf("Defendant")-1));
+			*/
 			
 			// Chop off the stuff we just worked with
 			i = s.indexOf("Location");
@@ -102,8 +108,22 @@ public class Main {
 			
 			s = s.substring(i-1, s.length());
 			System.out.println("s.length = " + s.length());
+			
+			// Get rid of all newlines in t
+			t = t.replaceAll("\n", "");
+			t = t.replaceAll("\r", "");
+			
+			// Add a newline at the end of t 
+			t = t.concat("\n");
+			
+			// Add t to f
+			f = f.concat(t);
+			
+			t = "";
+			
 		}
 		
+		f = f.replaceAll("\\r\\n", "");
 		System.out.println("\n\n" + f);
 		System.out.println("s length: " + s.length());
 		
