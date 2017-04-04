@@ -16,6 +16,7 @@ public class Main {
 		try {
 			
 		    String text = getText(new File("C:\\Users\\Christian\\Google Drive\\Jobs\\Arnold\\sheriff_foreclosuresales_list.pdf"));
+		    System.out.println(text.substring(0, 2000));
 		    out.println(formatText(text));
 		    
 		} catch (IOException e) {
@@ -24,16 +25,23 @@ public class Main {
 		    
 		}
 		
+		out.close();
+		
 	}
 	
 	public static String getText(File pdfFile) throws IOException {
 		
 	    PDDocument doc = PDDocument.load(pdfFile);
 	    PDFTextStripper stripper = new PDFTextStripper();
+	    String result = "";
+	    
 	    // Extract the text in order (doesn't do that by default)
 	    stripper.setSortByPosition(true);
 	    
-	    return stripper.getText(doc);
+	    result = stripper.getText(doc);
+	    doc.close();
+	    
+	    return result;
 	    
 	}
 
@@ -49,56 +57,61 @@ public class Main {
 		// Replace all of the commas in the pdf with spaces
 		s = s.replace(',', ' ');
 		
-		String f = "File Number,Court Case No.,Plaintiff,Defendant,Attorney,Location,Original Sale Date\n";
+		// First row in CSV to mark what each column represents
+		String f = "File Number,Court Case No.,Plaintiff,Defendant,Attorney,Sale Price,Location,Original Sale Date,Current Sale Date\n";
 		
-		// Temporary string to hold first wave of formatting. The data will be put into commas
-		// and then will be stripped of newlines. Then a newline will be added to the end of 
-		// the date so the excel file looks nice.
+		// Temporary string to hold first wave of formatting
 		String t = "";
+		
+		// This will hold either "Scheduled" "Sale Price" or "Minimum Bid"
+		String afterAttorney = "";
+		
+		// Indexer for when we need to step through string (explained where used)
 		int i = 0;
 		
 		while(s.length() > 71) {
-			// Concatenate the value for File Number.
+			// Concatenate the value for File Number
 			t = t.concat(s.substring(s.indexOf("File Number:  ")+14, s.indexOf("File Number:  ")+22) + ",");
 			
 			// Court Case No.
 			t = t.concat(s.substring(s.indexOf("Court Case No.:  ")+17, s.indexOf("Court Case No.:  ")+28) + ",");
 					
-			// 
-			// Find the end of Location
-			i = s.indexOf("Plaintiff");
-			while (i != s.indexOf("Defendant")) {
-				i++;
-			}
 			// Plaintiff
-			t = t.concat(s.substring(s.indexOf("Plaintiff ")+10, i) + ",");
+			t = t.concat(s.substring(s.indexOf("Plaintiff ")+10, s.indexOf("Defendant")-12) + ",");
 			
 			// Defendant
 			t = t.concat(s.substring(s.indexOf("Defendant ")+10, s.indexOf("Attorney")-2) + ",");
 			
 			// Attorney
 			i = s.indexOf("Attorney");
-			while (!s.substring(i, i+2).equals("Sc") && !s.substring(i, i+2).equals("SO") && !s.substring(i, i+2).equals("MI")) {
+			afterAttorney = s.substring(i, i+2);
+			while (!afterAttorney.equals("Sc") && !afterAttorney.equals("SO") && !afterAttorney.equals("MI")) {
 				i++;
+				afterAttorney = s.substring(i, i+2);
 			}
 			t = t.concat(s.substring(s.indexOf("Attorney ")+9, i) + ",");
 			
-			// Sale Date
+			// Sale Price
+			if (afterAttorney.equals("Sc") || afterAttorney.equals("MI")) {
+				t = t.concat(",");
+			}
+			else if (afterAttorney.equals("SO")) {
+				t = t.concat(s.substring(s.indexOf("SOLD")+4, s.indexOf("SOLD")+15) + ",");
+
+			}
+			
+			// Location
 			i = s.indexOf("Location");
 			while (s.charAt(i) != '\n') {
 				i++;
 			}
 			t = t.concat(s.substring(s.indexOf("Location: ")+10, i-1) + ",");
-	     
-			t = t.concat(s.substring(s.indexOf("Sale Date: ")+11, s.indexOf("File Number: ")-1));
+	     				
+			// Original Sale Date
+			t = t.concat(s.substring(s.indexOf("Original Sale Date: ")+21, s.indexOf("File Number: ")-1) + ",");
 			
-			/*
-			i = s.indexOf("Plaintiff");
-			while (!s.substring(i, i+2).equals("  ")) {
-				i++;
-			}
-			f = f.concat(s.substring(i+2, s.indexOf("Defendant")-1));
-			*/
+			// Current Sale Date
+			t = t.concat(s.substring(s.indexOf("Current Sale Date: ")+19, s.indexOf("Plaintiff ")-1) + ",");
 			
 			// Chop off the stuff we just worked with
 			i = s.indexOf("Location");
@@ -107,9 +120,8 @@ public class Main {
 			}
 			
 			s = s.substring(i-1, s.length());
-			System.out.println("s.length = " + s.length());
 			
-			// Get rid of all newlines in t
+			// Get rid of all newlines and carriage returns in t (messes up CSV formatting)
 			t = t.replaceAll("\n", "");
 			t = t.replaceAll("\r", "");
 			
@@ -124,9 +136,6 @@ public class Main {
 		}
 		
 		f = f.replaceAll("\\r\\n", "");
-		System.out.println("\n\n" + f);
-		System.out.println("s length: " + s.length());
-		
 		return f;
 		
 	}
