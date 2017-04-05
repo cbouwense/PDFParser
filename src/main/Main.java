@@ -15,8 +15,9 @@ public class Main {
 		
 		try {
 			
-		    String text = getText(new File("C:\\Users\\Christian\\Google Drive\\Jobs\\Arnold\\sheriff_foreclosuresales_list.pdf"));
-		    System.out.println(text.substring(0, 2000));
+			// Extracts the text from the pdf into a string
+		    String text = getText(new File("sheriff_foreclosuresales_list.pdf"));
+		    // Outputs that string into the values.csv file
 		    out.println(formatText(text));
 		    
 		} catch (IOException e) {
@@ -29,9 +30,15 @@ public class Main {
 		
 	}
 	
+	/**
+	 * 
+	 * @param pdfFile		The path to the pdf file we wish to extract text from.
+	 * @return				The extracted text from the pdf in a string.
+	 * @throws IOException	Will be thrown if the pdf cannot be found.
+	 */
 	public static String getText(File pdfFile) throws IOException {
 		
-	    PDDocument doc = PDDocument.load(pdfFile);
+		PDDocument doc = PDDocument.load(pdfFile);
 	    PDFTextStripper stripper = new PDFTextStripper();
 	    String result = "";
 	    
@@ -47,10 +54,10 @@ public class Main {
 
 	/**
 	 * 
-	 * @param s - Text extracted from the pdf in unformatted string form.
-	 * @return f - Text formatted into CSV. Extracts File Number, Court Case Number,
-	 * 			   Plaintiff, Defendant, Attorney, Location, Original Sale Date,
-	 * 			   and Sold Price. (NOTE: CURRENTLY CANNOT DO SOLD PRICE)
+	 * @param s		Text extracted from the pdf in unformatted string form.
+	 * @return f	Text formatted into CSV. Extracts File Number, Court Case Number,
+	 * 			  	Plaintiff, Defendant, Attorney, Location, Original Sale Date,
+	 * 			  	and Sold Price. (NOTE: CURRENTLY CANNOT DO SOLD PRICE)
 	 */
 	public static String formatText(String s) {
 		
@@ -69,6 +76,9 @@ public class Main {
 		// Indexer for when we need to step through string (explained where used)
 		int i = 0;
 		
+		// We extract text and chop off what we've gotten from the main string containing all the PDF data.
+		// We only loop while the string is longer than 71 because of footer text which will still remain
+		// once we scrape all the data we need.
 		while(s.length() > 71) {
 			// Concatenate the value for File Number
 			t = t.concat(s.substring(s.indexOf("File Number:  ")+14, s.indexOf("File Number:  ")+22) + ",");
@@ -135,6 +145,7 @@ public class Main {
 			
 		}
 		
+		// Remove all newline carriage return combos because these mess up the CSV formatting
 		f = f.replaceAll("\\r\\n", "");
 		return f;
 		
